@@ -68,8 +68,31 @@ class Robot
     Motor motor4;
 
     public:
-    Robot() : motor1(18, 19), motor2(20, 21), motor3(6, 7), motor4(8, 9) {} //Default Assignment Constructor
+    Robot() : motor1(18, 19), motor2(21, 20), motor3(7, 6), motor4(9, 8) {} //Default Assignment Constructor
 
+    void setup()
+    {
+        motor1.setup();
+        motor2.setup();
+        motor3.setup();
+        motor4.setup();
+    }
+
+    void moveforward()
+    {
+        motor1.forward();
+        motor2.forward();
+        motor3.forward();
+        motor4.forward();
+    }
+
+    void stop()
+    {
+        motor1.stop();
+        motor2.stop();
+        motor3.stop();
+        motor4.stop();
+    }
 };
 
 
@@ -142,22 +165,11 @@ float get_distance() {
 */
 
 int main() {
-    stdio_init_all();
-    setup_motors();
-    setup_ultrasonic();
-
-    while (true) {
-        float distance = get_distance();
-        std::cout << "Distance: " << distance << " cm" << std::endl;
-
-        if (distance > 15.0) {
-            std::cout << "Moving forward" << std::endl;
-            move_forward();
-        } else {
-            std::cout << "Stopping" << std::endl;
-            stop_motors();
-        }
-        
-        sleep_ms(500);
+    Robot robot;
+    robot.setup();
+    
+    while(true) 
+    {
+        robot.moveforward();
     }
 }
