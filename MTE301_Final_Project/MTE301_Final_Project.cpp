@@ -172,12 +172,13 @@ float get_distance() {
 }
 */
 
-int main() {
+int main()
+{
     Robot robot;
     robot.setup();
     
     while(true) 
     {
-        robot.turnLeft();
+        robot.moveforward();
     }
 }
