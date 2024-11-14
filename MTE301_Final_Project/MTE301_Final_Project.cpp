@@ -96,10 +96,10 @@ class Robot
 
     void turnLeft()
     {
-        motor1.reverse();   
-        motor2.reverse();   
-        motor3.forward();   
-        motor4.forward();   
+        motor1.reverse();
+        motor2.reverse();
+        motor3.forward();
+        motor4.forward();
     }
 };
 
