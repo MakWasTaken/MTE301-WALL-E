@@ -8,7 +8,6 @@ class Motor
     private:
     unsigned int IN1;
     unsigned int IN2;
-    unsigned int dutyCycle;
 
     public:
     Motor() {}  //Default Constructor
@@ -38,6 +37,11 @@ class Motor
     {
         gpio_init(IN1);
         gpio_set_dir(IN1, GPIO_OUT);
+        gpio_set_function(IN1, GPIO_FUNC_PWM);
+        unsigned int slice_num = pwm_gpio_to_slice_num(IN1);
+        pwm_set_wrap(slice_num, 255);
+        pwm_set_enabled(slice_num, true);
+
         gpio_init(IN2);
         gpio_set_dir(IN2, GPIO_OUT);
     }
@@ -45,43 +49,37 @@ class Motor
 
     void forward(unsigned int speed)  //Turn motor forwards
     {
-        if(speed < 0)
-        {
-            speed = 0;
-        }
+        int speedPercent;
 
         if(speed > 100)
         {
             speed = 100;
         }
 
-        dutyCycle = (speed/100)*255.0;
+        speedPercent = (speed*255)/100;
 
-        pwm_set_gpio_level(IN1, dutyCycle);
+        pwm_set_gpio_level(IN1, speedPercent);
         gpio_put(IN2, 0);
     }
 
     void reverse(unsigned int speed)  //Turn motor backwards
     {
-        if(speed < 0)
-        {
-            speed = 0;
-        }
+        int speedPercent;
 
         if(speed > 100)
         {
             speed = 100;
         }
 
-        dutyCycle = (speed/100)*255.0;
+        speedPercent = (speed*255)/100;
 
-        pwm_set_gpio_level(IN1, 0);
-        gpio_put(IN2, dutyCycle);
+        pwm_set_gpio_level(IN1, speedPercent);
+        gpio_put(IN2, 1);
     }
 
     void stop() //Stop the motor
     {
-        gpio_put(IN1, 0);
+        pwm_set_gpio_level(IN1, 0);
         gpio_put(IN2, 0);
     }
 };
@@ -105,12 +103,20 @@ class Robot
         motor4.setup();
     }
 
-    void moveforward(unsigned int speed)  //Robot Move Forward
+    void moveForward(unsigned int speed)  //Robot Move Forward
     {
         motor1.forward(speed);   
         motor2.forward(speed);   
         motor3.forward(speed);   
         motor4.forward(speed);   
+    }
+
+    void moveBackward(unsigned int speed)  //Robot Move Backward
+    {
+        motor1.reverse(speed);   
+        motor2.reverse(speed);   
+        motor3.reverse(speed);   
+        motor4.reverse(speed);   
     }
 
     void stop() //Robot Stop
@@ -123,10 +129,10 @@ class Robot
 
     void turnLeft()
     {
-        motor1.reverse(50);
-        motor2.reverse(25);
-        motor3.forward(25);
-        motor4.forward(50);
+        motor1.reverse(40);
+        motor2.reverse(20);
+        motor3.forward(20);
+        motor4.forward(40);
     }
 };
 
@@ -206,6 +212,10 @@ int main()
     
     while(true) 
     {
-        robot.moveforward(25);
+        robot.moveForward(20);
+        sleep_ms(500);
+
+        robot.stop();
+        sleep_ms(1000);
     }
 }
