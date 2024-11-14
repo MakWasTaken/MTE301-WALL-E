@@ -62,10 +62,10 @@ class Motor
 class Robot
 {
     private:
-    Motor motor1;
-    Motor motor2;
-    Motor motor3;
-    Motor motor4;
+    Motor motor1;   //Front Left
+    Motor motor2;   //Back Left
+    Motor motor3;   //Front Right
+    Motor motor4;   //Back Right
 
     public:
     Robot() : motor1(18, 19), motor2(21, 20), motor3(7, 6), motor4(9, 8) {} //Default Assignment Constructor
@@ -80,10 +80,10 @@ class Robot
 
     void moveforward()  //Robot Move Forward
     {
-        motor1.forward();
-        motor2.forward();
-        motor3.forward();
-        motor4.forward();
+        motor1.forward();   
+        motor2.forward();   
+        motor3.forward();   
+        motor4.forward();   
     }
 
     void stop() //Robot Stop
@@ -92,6 +92,14 @@ class Robot
         motor2.stop();
         motor3.stop();
         motor4.stop();
+    }
+
+    void turnLeft()
+    {
+        motor1.reverse();   
+        motor2.reverse();   
+        motor3.forward();   
+        motor4.forward();   
     }
 };
 
@@ -170,6 +178,6 @@ int main() {
     
     while(true) 
     {
-        robot.moveforward();
+        robot.turnLeft();
     }
 }
