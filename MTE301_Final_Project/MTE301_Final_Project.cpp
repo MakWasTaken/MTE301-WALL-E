@@ -70,7 +70,7 @@ class Robot
     public:
     Robot() : motor1(18, 19), motor2(21, 20), motor3(7, 6), motor4(9, 8) {} //Default Assignment Constructor
 
-    void setup()    //Robot Setup
+    void setup()    //Robot Setup Function
     {
         motor1.setup();
         motor2.setup();
@@ -78,7 +78,7 @@ class Robot
         motor4.setup();
     }
 
-    void moveforward()
+    void moveforward()  //Robot move Forward Function
     {
         motor1.forward();
         motor2.forward();
