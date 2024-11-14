@@ -1,12 +1,14 @@
 /*This code was developed by Joel Valley, Nathan Mak, and Juan Forero*/
 #include <iostream>
 #include "pico/stdlib.h"
+#include "hardware/pwm.h"
 
 class Motor
 {
     private:
     unsigned int IN1;
     unsigned int IN2;
+    unsigned int dutyCycle;
 
     public:
     Motor() {}  //Default Constructor
@@ -39,17 +41,42 @@ class Motor
         gpio_init(IN2);
         gpio_set_dir(IN2, GPIO_OUT);
     }
+    
 
-    void forward()  //Turn motor forwards
+    void forward(unsigned int speed)  //Turn motor forwards
     {
-        gpio_put(IN1, 1);
+        if(speed < 0)
+        {
+            speed = 0;
+        }
+
+        if(speed > 100)
+        {
+            speed = 100;
+        }
+
+        dutyCycle = (speed/100)*255.0;
+
+        pwm_set_gpio_level(IN1, dutyCycle);
         gpio_put(IN2, 0);
     }
 
-    void reverse()  //Turn motor backwards
+    void reverse(unsigned int speed)  //Turn motor backwards
     {
-        gpio_put(IN1, 0);
-        gpio_put(IN2, 1);
+        if(speed < 0)
+        {
+            speed = 0;
+        }
+
+        if(speed > 100)
+        {
+            speed = 100;
+        }
+
+        dutyCycle = (speed/100)*255.0;
+
+        pwm_set_gpio_level(IN1, 0);
+        gpio_put(IN2, dutyCycle);
     }
 
     void stop() //Stop the motor
@@ -78,12 +105,12 @@ class Robot
         motor4.setup();
     }
 
-    void moveforward()  //Robot Move Forward
+    void moveforward(unsigned int speed)  //Robot Move Forward
     {
-        motor1.forward();   
-        motor2.forward();   
-        motor3.forward();   
-        motor4.forward();   
+        motor1.forward(speed);   
+        motor2.forward(speed);   
+        motor3.forward(speed);   
+        motor4.forward(speed);   
     }
 
     void stop() //Robot Stop
@@ -96,10 +123,10 @@ class Robot
 
     void turnLeft()
     {
-        motor1.reverse();
-        motor2.reverse();
-        motor3.forward();
-        motor4.forward();
+        motor1.reverse(50);
+        motor2.reverse(25);
+        motor3.forward(25);
+        motor4.forward(50);
     }
 };
 
@@ -179,6 +206,6 @@ int main()
     
     while(true) 
     {
-        robot.moveforward();
+        robot.moveforward(25);
     }
 }

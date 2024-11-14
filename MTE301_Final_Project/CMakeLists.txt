@@ -48,6 +48,10 @@ pico_enable_stdio_usb(MTE301_Final_Project 0)
 target_link_libraries(MTE301_Final_Project
         pico_stdlib)
 
+# Add the hardware library to the build
+target_link_libraries(MTE301_Final_Project
+        hardware_pwm)
+
 # Add the standard include files to the build
 target_include_directories(MTE301_Final_Project PRIVATE
   ${CMAKE_CURRENT_LIST_DIR}
