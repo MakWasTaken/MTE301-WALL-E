@@ -70,7 +70,7 @@ class Robot
     public:
     Robot() : motor1(18, 19), motor2(21, 20), motor3(7, 6), motor4(9, 8) {} //Default Assignment Constructor
 
-    void setup()
+    void setup()    //Robot Setup
     {
         motor1.setup();
         motor2.setup();
