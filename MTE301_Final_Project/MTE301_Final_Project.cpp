@@ -37,10 +37,10 @@ class Motor
     {
         gpio_init(IN1);
         gpio_set_dir(IN1, GPIO_OUT);
-        gpio_set_function(IN1, GPIO_FUNC_PWM);
-        unsigned int slice_num = pwm_gpio_to_slice_num(IN1);
-        pwm_set_wrap(slice_num, 255);
-        pwm_set_enabled(slice_num, true);
+        gpio_set_function(IN1, GPIO_FUNC_PWM);  //Set the first pin to be a PWM pin type (Pulse Width Modulation)
+        unsigned int slice_num = pwm_gpio_to_slice_num(IN1);    //Get the PWM slice num for the first pin
+        pwm_set_wrap(slice_num, 255);   //Make sure motor speed adjusts smoothly
+        pwm_set_enabled(slice_num, true);   //Turn on PWM signal for first pin
 
         gpio_init(IN2);
         gpio_set_dir(IN2, GPIO_OUT);
@@ -129,10 +129,10 @@ class Robot
 
     void turnLeft()
     {
-        motor1.reverse(40);
+        motor1.reverse(20);
         motor2.reverse(20);
         motor3.forward(20);
-        motor4.forward(40);
+        motor4.forward(20);
     }
 };
 
@@ -212,7 +212,7 @@ int main()
     
     while(true) 
     {
-        robot.moveForward(20);
+        robot.turnLeft();
         sleep_ms(500);
 
         robot.stop();
