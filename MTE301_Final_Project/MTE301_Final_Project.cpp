@@ -213,7 +213,7 @@ int main()
     while(true) 
     {
         robot.turnLeft();
-        sleep_ms(500);
+        sleep_ms(2000);
 
         robot.stop();
         sleep_ms(1000);
