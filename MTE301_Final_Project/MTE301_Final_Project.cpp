@@ -37,13 +37,19 @@ class Motor
     {
         gpio_init(IN1);
         gpio_set_dir(IN1, GPIO_OUT);
+
         gpio_set_function(IN1, GPIO_FUNC_PWM);  //Set the first pin to be a PWM pin type (Pulse Width Modulation)
-        unsigned int slice_num = pwm_gpio_to_slice_num(IN1);    //Get the PWM slice num for the first pin
-        pwm_set_wrap(slice_num, 255);   //Make sure motor speed adjusts smoothly
-        pwm_set_enabled(slice_num, true);   //Turn on PWM signal for first pin
+        int slice_num1 = pwm_gpio_to_slice_num(IN1);    //Get the PWM slice num for the first pin
+        pwm_set_wrap(slice_num1, 255);   //Make sure motor speed adjusts smoothly
+        pwm_set_enabled(slice_num1, true);   //Turn on PWM signal for first pin
 
         gpio_init(IN2);
         gpio_set_dir(IN2, GPIO_OUT);
+
+        gpio_set_function(IN1, GPIO_FUNC_PWM);  //Set the second pin to be a PWM pin type (Pulse Width Modulation)
+        int slice_num2 = pwm_gpio_to_slice_num(IN2);    //Get the PWM slice num for the second pin
+        pwm_set_wrap(slice_num2, 255);   //Make sure motor speed adjusts smoothly
+        pwm_set_enabled(slice_num2, true);   //Turn on PWM signal for second pin
     }
     
 
@@ -58,8 +64,10 @@ class Motor
 
         speedPercent = (speed*255)/100;
 
-        pwm_set_gpio_level(IN1, speedPercent);
+        gpio_put(IN1, 1);
         gpio_put(IN2, 0);
+        pwm_set_gpio_level(IN1, speedPercent);
+        pwm_set_gpio_level(IN2, 0);
     }
 
     void reverse(unsigned int speed)  //Turn motor backwards
@@ -73,14 +81,18 @@ class Motor
 
         speedPercent = (speed*255)/100;
 
-        pwm_set_gpio_level(IN1, speedPercent);
+        gpio_put(IN1, 0);
         gpio_put(IN2, 1);
+        pwm_set_gpio_level(IN1, 0);
+        pwm_set_gpio_level(IN2, speedPercent);
     }
 
     void stop() //Stop the motor
     {
-        pwm_set_gpio_level(IN1, 0);
+        gpio_put(IN1, 0);
         gpio_put(IN2, 0);
+        pwm_set_gpio_level(IN1, 0);
+        pwm_set_gpio_level(IN2, 0);
     }
 };
 
@@ -144,100 +156,30 @@ class Robot
     }
 };
 
-
-//CHATGPT CODE IS AFTER THIS COMMENT, LOOK AT IT FOR REFERENCE OF HOW TO USE CERTAIN FUNCTIONS//
-
-/*
-// Motor GPIO pins
-#define MOTOR_1_IN1 18
-#define MOTOR_1_IN2 19
-#define MOTOR_2_IN1 20
-#define MOTOR_2_IN2 21
-
-// Ultrasonic sensor GPIO pins
-#define TRIG_PIN 4
-#define ECHO_PIN 5
-
-// Motor control functions
-void setup_motors() {
-    gpio_init(MOTOR_1_IN1);
-    gpio_set_dir(MOTOR_1_IN1, GPIO_OUT);
-    gpio_init(MOTOR_1_IN2);
-    gpio_set_dir(MOTOR_1_IN2, GPIO_OUT);
-
-    gpio_init(MOTOR_2_IN1);
-    gpio_set_dir(MOTOR_2_IN1, GPIO_OUT);
-    gpio_init(MOTOR_2_IN2);
-    gpio_set_dir(MOTOR_2_IN2, GPIO_OUT);
-}
-
-void move_forward() {
-    gpio_put(MOTOR_1_IN1, 1);
-    gpio_put(MOTOR_1_IN2, 0);
-    gpio_put(MOTOR_2_IN1, 1);
-    gpio_put(MOTOR_2_IN2, 0);
-}
-
-void stop_motors() {
-    gpio_put(MOTOR_1_IN1, 0);
-    gpio_put(MOTOR_1_IN2, 0);
-    gpio_put(MOTOR_2_IN1, 0);
-    gpio_put(MOTOR_2_IN2, 0);
-}
-
-// Ultrasonic sensor functions
-void setup_ultrasonic() {
-    gpio_init(TRIG_PIN);
-    gpio_set_dir(TRIG_PIN, GPIO_OUT);
-    gpio_init(ECHO_PIN);
-    gpio_set_dir(ECHO_PIN, GPIO_IN);
-}
-
-float get_distance() {
-    // Send a 10us pulse on TRIG_PIN to start measurement
-    gpio_put(TRIG_PIN, 1);
-    sleep_us(10);
-    gpio_put(TRIG_PIN, 0);
-
-    // Wait for the pulse on the ECHO_PIN
-    while (gpio_get(ECHO_PIN) == 0);
-    absolute_time_t start_time = get_absolute_time();
-    while (gpio_get(ECHO_PIN) == 1);
-    absolute_time_t end_time = get_absolute_time();
-
-    // Calculate the distance based on time and speed of sound
-    int64_t pulse_duration = absolute_time_diff_us(start_time, end_time);
-    float distance = (pulse_duration * 0.0343f) / 2.0f; // Speed of sound in cm/us
-
-    return distance;
-}
-*/
-
 int main()
 {
     Robot robot;
     robot.setup();
     
-    while(true) 
+    while(true)
     {
-        sleep_ms(2000);
+        sleep_ms(5000);
 
         robot.moveForward(50);
-        sleep_ms(3000);
-
-        robot.stop();
-        sleep_ms(1000);
-
-        robot.turnLeft();
         sleep_ms(1500);
 
         robot.stop();
         sleep_ms(1000);
 
-        robot.moveBackward(50);
-        sleep_ms(3000);
+        robot.turnLeft();
+        sleep_ms(1100);
 
         robot.stop();
-        sleep_ms(3000);
+        sleep_ms(1000);
+
+        robot.moveBackward(50);
+        sleep_ms(1500);
+
+        robot.stop();
     }
 }
