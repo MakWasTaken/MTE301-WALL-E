@@ -134,6 +134,14 @@ class Robot
         motor3.forward(20);
         motor4.forward(20);
     }
+
+    void turnRight()
+    {
+        motor1.forward(20);
+        motor2.forward(20);
+        motor3.reverse(20);
+        motor4.reverse(20);
+    }
 };
 
 
@@ -212,10 +220,24 @@ int main()
     
     while(true) 
     {
-        robot.turnLeft();
         sleep_ms(2000);
+
+        robot.moveForward(50);
+        sleep_ms(3000);
 
         robot.stop();
         sleep_ms(1000);
+
+        robot.turnLeft();
+        sleep_ms(1500);
+
+        robot.stop();
+        sleep_ms(1000);
+
+        robot.moveBackward(50);
+        sleep_ms(3000);
+
+        robot.stop();
+        sleep_ms(3000);
     }
 }
