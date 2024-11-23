@@ -149,11 +149,11 @@ class Sensor
 
         gpio_put(trigPin, 0);
 
-        while (!gpio_get(echoPin)) {}   //Wait for Echo Pin to Trigger
-        absolute_time_t start_time = get_absolute_time();    //Find the Absolute Start Time the Sensor Starts to Trigger
+        while (!gpio_get(echoPin)) {}   //When the Echo Pin Does Not Read Anything
+        absolute_time_t start_time = get_absolute_time();    //Find the Absolute Start Time when the Signal is Sent
 
-        while (gpio_get(echoPin)) {}   //Wait for Echo Pin to Stop
-        absolute_time_t end_time = get_absolute_time();  //Find the Absolute End Time the Sensor Stops
+        while (gpio_get(echoPin)) {}   //When the Echo Pin Reads the Signal
+        absolute_time_t end_time = get_absolute_time();  //Find the Absolute End Time when the Signal is Read
 
         //Unsigned Integer With 64 bits for Increased Precision
         uint64_t duration = absolute_time_diff_us(start_time, end_time);    //Calculate the Difference Between Start and End Times
