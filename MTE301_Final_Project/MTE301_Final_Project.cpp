@@ -158,7 +158,7 @@ class Sensor
         //Unsigned Integer With 64 bits for Increased Precision
         uint64_t duration = absolute_time_diff_us(start_time, end_time);    //Calculate the Difference Between Start and End Times
 
-        double distance_cm = (0.343*duration)/2.0;  //Distance Function
+        double distance_cm = (0.0343*duration)/2.0;  //Distance Function
 
         return distance_cm;
     }
@@ -210,7 +210,7 @@ class Robot
     onBoardLED led; //Pico On Board LED
 
     public:
-    Robot() : motor1(18, 19), motor2(21, 20), motor3(7, 6), motor4(9, 8), sensor(4, 5) {} //Default Assignment Constructor
+    Robot() : motor1(18, 19), motor2(21, 20), motor3(7, 6), motor4(9, 8), sensor(4, 5), led(25) {} //Default Assignment Constructor
 
     void setup()    //Robot Setup
     {
@@ -265,7 +265,9 @@ class Robot
 
     void tooClose()
     {
-        if(sensor.findDis() < 30.0)
+        double distance = sensor.findDis();
+
+        if(distance < 30.0)
         {
             led.ledON();
         }
@@ -284,5 +286,8 @@ int main()
     while(true)
     {
         robot.tooClose();
+        sleep_ms(100);
     }
+
+    return 0;
 }
