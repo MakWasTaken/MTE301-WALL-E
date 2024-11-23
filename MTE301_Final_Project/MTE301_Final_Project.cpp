@@ -1,5 +1,6 @@
 /*This code was developed by Joel Valley, Nathan Mak, and Juan Forero*/
 #include <iostream>
+#include <cstdint>
 #include "pico/stdlib.h"
 #include "hardware/pwm.h"
 
@@ -154,9 +155,10 @@ class Sensor
         while (gpio_get(echoPin)) {}   //Wait for Echo Pin to Stop
         absolute_time_t end_time = get_absolute_time();  //Find the Absolute End Time the Sensor Stops
 
+        //Unsigned Integer With 64 bits for Increased Precision
         uint64_t duration = absolute_time_diff_us(start_time, end_time);    //Calculate the Difference Between Start and End Times
 
-        double distance_cm = (0.343*duration)/2.0;
+        double distance_cm = (0.343*duration)/2.0;  //Distance Function
 
         return distance_cm;
     }
