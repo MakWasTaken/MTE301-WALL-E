@@ -107,7 +107,7 @@ class Sensor
 
     public:
     Sensor() {} //Default Constructor
-    Sensor(unsigned int tp, unsigned int ep) : trigPin(tp), echoPin(ep) {} //Parametric Constructor
+    Sensor(unsigned int tp, unsigned int ep) : trigPin(tp), echoPin(ep) {} //Parametric Assignment Constructor
 
     const int getTrig() const    //Trig Pin Getter
     {
@@ -164,6 +164,33 @@ class Sensor
     }
 };
 
+class onBoardLED
+{
+    private:
+    unsigned int PIN;
+
+    public:
+    onBoardLED() {} //Default Constructor
+    onBoardLED(unsigned int pin) : PIN(pin) {} //Parametric Assignment Constructor
+
+    void setup()
+    {
+        gpio_init(PIN);
+        gpio_set_dir(PIN, GPIO_OUT);
+        gpio_put(PIN, 0);
+    }
+
+    void ledON()
+    {
+        gpio_put(PIN, 1);
+    }
+
+    void ledOFF()
+    {
+        gpio_put(PIN, 0);
+    }
+};
+
 class Servo
 {
     private:
@@ -180,6 +207,7 @@ class Robot
     Motor motor4;   //Back Right
 
     Sensor sensor;  //Ultrasonic Sensor
+    onBoardLED led; //Pico On Board LED
 
     public:
     Robot() : motor1(18, 19), motor2(21, 20), motor3(7, 6), motor4(9, 8), sensor(4, 5) {} //Default Assignment Constructor
@@ -192,6 +220,7 @@ class Robot
         motor4.setup();
 
         sensor.setup();
+        led.setup();
     }
 
     void moveForward(unsigned int speed)  //Robot Move Forward
@@ -233,6 +262,18 @@ class Robot
         motor3.reverse(20);
         motor4.reverse(20);
     }
+
+    void tooClose()
+    {
+        if(sensor.findDis() < 30.0)
+        {
+            led.ledON();
+        }
+        else
+        {
+            led.ledOFF();
+        }
+    }
 };
 
 int main()
@@ -242,23 +283,6 @@ int main()
     
     while(true)
     {
-        sleep_ms(5000);
-
-        robot.moveForward(50);
-        sleep_ms(1500);
-
-        robot.stop();
-        sleep_ms(1000);
-
-        robot.turnLeft();
-        sleep_ms(1100);
-
-        robot.stop();
-        sleep_ms(1000);
-
-        robot.moveBackward(50);
-        sleep_ms(1500);
-
-        robot.stop();
+        robot.tooClose();
     }
 }
