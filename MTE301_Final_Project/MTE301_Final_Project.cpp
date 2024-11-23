@@ -37,6 +37,7 @@ class Motor
     {
         gpio_init(IN1);
         gpio_set_dir(IN1, GPIO_OUT);
+        gpio_put(IN1, 0);
 
         gpio_set_function(IN1, GPIO_FUNC_PWM);  //Set the first pin to be a PWM pin type (Pulse Width Modulation)
         int slice_num1 = pwm_gpio_to_slice_num(IN1);    //Get the PWM slice num for the first pin
@@ -45,6 +46,7 @@ class Motor
 
         gpio_init(IN2);
         gpio_set_dir(IN2, GPIO_OUT);
+        gpio_put(IN2, 0);
 
         gpio_set_function(IN1, GPIO_FUNC_PWM);  //Set the second pin to be a PWM pin type (Pulse Width Modulation)
         int slice_num2 = pwm_gpio_to_slice_num(IN2);    //Get the PWM slice num for the second pin
@@ -96,6 +98,77 @@ class Motor
     }
 };
 
+class Sensor
+{
+    private:
+    unsigned int trigPin;
+    unsigned int echoPin;
+
+    public:
+    Sensor() {} //Default Constructor
+    Sensor(unsigned int tp, unsigned int ep) : trigPin(tp), echoPin(ep) {} //Parametric Constructor
+
+    const int getTrig() const    //Trig Pin Getter
+    {
+        return(trigPin);
+    }
+
+    const int getEcho() const    //Echo Pin Getter
+    {
+        return(echoPin);
+    }
+
+    void setTrig(const unsigned int &pin) //Trig Pin Setter
+    {
+        trigPin = pin;
+    }
+
+    void setEcho(const unsigned int &pin) //Echo Pin Setter
+    {
+        echoPin = pin;
+    }
+
+    void setup()    //Set up Trigger Pin to be Input and Echo Pin to be Output
+    {
+        gpio_init(trigPin);
+        gpio_set_dir(trigPin, GPIO_OUT);
+        gpio_put(trigPin, 0);
+
+        gpio_init(echoPin);
+        gpio_set_dir(echoPin, GPIO_IN);
+    }
+
+    double findDis()
+    {
+        gpio_put(trigPin, 0);   //Start With Trigger Pin Off
+        sleep_us(2);
+
+        gpio_put(trigPin, 1);   //Trigger Pin Pulse 10 Microseconds
+        sleep_us(10);
+
+        gpio_put(trigPin, 0);
+
+        while (!gpio_get(echoPin)) {}   //Wait for Echo Pin to Trigger
+        absolute_time_t start_time = get_absolute_time();    //Find the Absolute Start Time the Sensor Starts to Trigger
+
+        while (gpio_get(echoPin)) {}   //Wait for Echo Pin to Stop
+        absolute_time_t end_time = get_absolute_time();  //Find the Absolute End Time the Sensor Stops
+
+        uint64_t duration = absolute_time_diff_us(start_time, end_time);    //Calculate the Difference Between Start and End Times
+
+        double distance_cm = (0.343*duration)/2.0;
+
+        return distance_cm;
+    }
+};
+
+class Servo
+{
+    private:
+
+
+};
+
 class Robot
 {
     private:
@@ -104,8 +177,10 @@ class Robot
     Motor motor3;   //Front Right
     Motor motor4;   //Back Right
 
+    Sensor sensor;  //Ultrasonic Sensor
+
     public:
-    Robot() : motor1(18, 19), motor2(21, 20), motor3(7, 6), motor4(9, 8) {} //Default Assignment Constructor
+    Robot() : motor1(18, 19), motor2(21, 20), motor3(7, 6), motor4(9, 8), sensor(4, 5) {} //Default Assignment Constructor
 
     void setup()    //Robot Setup
     {
@@ -113,6 +188,8 @@ class Robot
         motor2.setup();
         motor3.setup();
         motor4.setup();
+
+        sensor.setup();
     }
 
     void moveForward(unsigned int speed)  //Robot Move Forward
