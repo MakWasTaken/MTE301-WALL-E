@@ -288,6 +288,7 @@ int main()
         robot.tooClose();
         sleep_ms(100);
     }
+    //hello
 
     return 0;
 }
