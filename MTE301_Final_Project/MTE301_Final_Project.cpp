@@ -99,6 +99,45 @@ class Motor
     }
 };
 
+class Servo
+{
+    private:
+    unsigned int PIN;
+
+    public:
+    Servo() {} //Default constructor 
+    Servo(unsigned int p) : PIN(p) {} //Parametric Assignment Constructor 
+
+    void setup ()
+    {
+        gpio_set_function(PIN, GPIO_FUNC_PWM); //Set the pin to PWM function
+        int slice_num = pwm_gpio_to_slice_num(PIN);    //Get the PWM slice number
+        
+        pwm_set_clkdiv(slice_num, 64.0f); // Set clock divider for ~50 Hz frequency
+        pwm_set_wrap(slice_num, 19999); //Set the PWM frequency to 50Hz (20ms period)
+        pwm_set_enabled(slice_num, true);
+
+        pwm_set_gpio_level(PIN, 1500);
+    }
+
+    void setAngle(unsigned int angle)
+    {
+        if (angle < 0) 
+        {
+            angle = 0; 
+        }
+
+        if (angle > 180)
+        {
+            angle = 180;
+        }
+
+        unsigned int pulseWidth = 500 + (angle*2000)/180;
+
+        pwm_set_gpio_level(PIN, pulseWidth);
+    }
+};
+
 class Sensor
 {
     private:
@@ -191,13 +230,6 @@ class onBoardLED
     }
 };
 
-class Servo
-{
-    private:
-
-
-};
-
 class Robot
 {
     private:
@@ -208,9 +240,10 @@ class Robot
 
     Sensor sensor;  //Ultrasonic Sensor
     onBoardLED led; //Pico On Board LED
+    Servo servo;
 
     public:
-    Robot() : motor1(18, 19), motor2(21, 20), motor3(7, 6), motor4(9, 8), sensor(4, 5), led(25) {} //Default Assignment Constructor
+    Robot() : motor1(18, 19), motor2(21, 20), motor3(7, 6), motor4(9, 8), sensor(4, 5), led(25), servo(13) {} //Default Assignment Constructor
 
     void setup()    //Robot Setup
     {
@@ -221,6 +254,7 @@ class Robot
 
         sensor.setup();
         led.setup();
+        servo.setup();
     }
 
     void moveForward(unsigned int speed)  //Robot Move Forward
@@ -263,18 +297,25 @@ class Robot
         motor4.reverse(20);
     }
 
-    void tooClose()
+    bool tooClose()
     {
         double distance = sensor.findDis();
 
         if(distance < 30.0)
         {
             led.ledON();
+            return true;
         }
         else
         {
             led.ledOFF();
+            return false;
         }
+    }
+
+    void moveServo(unsigned int angle)
+    {
+        servo.setAngle(angle);
     }
 };
 
@@ -285,8 +326,8 @@ int main()
     
     while(true)
     {
-        robot.tooClose();
-        sleep_ms(100);
+        sleep_ms(2000);
+        robot.moveServo(180);
     }
 
     return 0;
