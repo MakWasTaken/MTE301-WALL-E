@@ -42,7 +42,7 @@ class Motor
 
         gpio_set_function(IN1, GPIO_FUNC_PWM);  //Set the first pin to be a PWM pin type (Pulse Width Modulation)
         int slice_num1 = pwm_gpio_to_slice_num(IN1);    //Get the PWM slice num for the first pin
-        pwm_set_wrap(slice_num1, 255);   //Make sure motor speed adjusts smoothly
+        pwm_set_wrap(slice_num1, 255);   //Configure the slice
         pwm_set_enabled(slice_num1, true);   //Turn on PWM signal for first pin
 
         gpio_init(IN2);
@@ -51,7 +51,7 @@ class Motor
 
         gpio_set_function(IN1, GPIO_FUNC_PWM);  //Set the second pin to be a PWM pin type (Pulse Width Modulation)
         int slice_num2 = pwm_gpio_to_slice_num(IN2);    //Get the PWM slice num for the second pin
-        pwm_set_wrap(slice_num2, 255);   //Make sure motor speed adjusts smoothly
+        pwm_set_wrap(slice_num2, 255);   //Configure the slice
         pwm_set_enabled(slice_num2, true);   //Turn on PWM signal for second pin
     }
     
