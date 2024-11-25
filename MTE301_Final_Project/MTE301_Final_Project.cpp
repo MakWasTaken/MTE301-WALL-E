@@ -3,6 +3,7 @@
 #include <cstdint>
 #include "pico/stdlib.h"
 #include "hardware/pwm.h"
+#include "hardware/clocks.h"
 
 class Motor
 {
@@ -108,33 +109,30 @@ class Servo
     Servo() {} //Default constructor 
     Servo(unsigned int p) : PIN(p) {} //Parametric Assignment Constructor 
 
-    void setup ()
+    void setup()
     {
-        gpio_set_function(PIN, GPIO_FUNC_PWM); //Set the pin to PWM function
-        int slice_num = pwm_gpio_to_slice_num(PIN);    //Get the PWM slice number
-        
-        pwm_set_clkdiv(slice_num, 64.0f); // Set clock divider for ~50 Hz frequency
-        pwm_set_wrap(slice_num, 19999); //Set the PWM frequency to 50Hz (20ms period)
-        pwm_set_enabled(slice_num, true);
+        gpio_set_function(PIN, GPIO_FUNC_PWM);  //Set the first pin to be a PWM pin type (Pulse Width Modulation)
+        int slice_num = pwm_gpio_to_slice_num(PIN);    //Get the PWM slice num for the first pin
 
-        pwm_set_gpio_level(PIN, 1500);
+        pwm_set_clkdiv(PIN, 125.0);
+        
+        pwm_set_wrap(slice_num, 20000);   //Configure the slice
+        pwm_set_enabled(slice_num, true);   //Turn on PWM signal for first pin
     }
 
-    void setAngle(unsigned int angle)
+    void setAngle(unsigned int degree)
     {
-        if (angle < 0) 
-        {
-            angle = 0; 
+        if (degree > 180){
+            return;
+        }
+        if (degree < 0){
+            return;
         }
 
-        if (angle > 180)
-        {
-            angle = 180;
-        }
+        unsigned int duty = 500 + (degree * 2000) / 180;
 
-        unsigned int pulseWidth = 500 + (angle*2000)/180;
 
-        pwm_set_gpio_level(PIN, pulseWidth);
+        pwm_set_gpio_level(PIN, duty);
     }
 };
 
@@ -263,6 +261,8 @@ class Robot
         motor2.forward(speed);   
         motor3.forward(speed);   
         motor4.forward(speed);   
+        
+        sleep_ms(10);
     }
 
     void moveBackward(unsigned int speed)  //Robot Move Backward
@@ -270,7 +270,9 @@ class Robot
         motor1.reverse(speed);   
         motor2.reverse(speed);   
         motor3.reverse(speed);   
-        motor4.reverse(speed);   
+        motor4.reverse(speed);
+
+        sleep_ms(10);   
     }
 
     void stop() //Robot Stop
@@ -279,6 +281,8 @@ class Robot
         motor2.stop();
         motor3.stop();
         motor4.stop();
+
+        sleep_ms(1000);
     }
 
     void turnLeft()
@@ -287,6 +291,8 @@ class Robot
         motor2.reverse(20);
         motor3.forward(20);
         motor4.forward(20);
+
+        sleep_ms(550);
     }
 
     void turnRight()
@@ -295,13 +301,15 @@ class Robot
         motor2.forward(20);
         motor3.reverse(20);
         motor4.reverse(20);
+
+        sleep_ms(550);
     }
 
     bool tooClose()
     {
         double distance = sensor.findDis();
 
-        if(distance < 30.0)
+        if(distance < 50.0)
         {
             led.ledON();
             return true;
@@ -313,9 +321,9 @@ class Robot
         }
     }
 
-    void moveServo(unsigned int angle)
+    void moveServo(unsigned int degree)
     {
-        servo.setAngle(angle);
+        servo.setAngle(degree);
     }
 };
 
@@ -323,11 +331,26 @@ int main()
 {
     Robot robot;
     robot.setup();
-    
+
     while(true)
     {
-        sleep_ms(2000);
-        robot.moveServo(180);
+        if(robot.tooClose())
+        {
+            robot.stop();
+            sleep_ms(800);
+
+            robot.moveBackward(50);
+            sleep_ms(300);
+
+            robot.stop();
+            sleep_ms(500);
+
+            robot.turnRight();
+        }
+        else
+        {
+            robot.moveForward(50);
+        }
     }
 
     return 0;
