@@ -109,30 +109,55 @@ class Servo
     Servo() {} //Default constructor 
     Servo(unsigned int p) : PIN(p) {} //Parametric Assignment Constructor 
 
-    void setup()
+    void setMillis(float millis)
     {
-        gpio_set_function(PIN, GPIO_FUNC_PWM);  //Set the first pin to be a PWM pin type (Pulse Width Modulation)
-        int slice_num = pwm_gpio_to_slice_num(PIN);    //Get the PWM slice num for the first pin
-
-        pwm_set_clkdiv(PIN, 125.0);
-        
-        pwm_set_wrap(slice_num, 20000);   //Configure the slice
-        pwm_set_enabled(slice_num, true);   //Turn on PWM signal for first pin
+        pwm_set_gpio_level(PIN, (millis/20000.f)*39062.f);
     }
 
-    void setAngle(unsigned int degree)
+    void setup(float startMillis)
     {
-        if (degree > 180){
-            return;
+        float clockDiv = 64;   
+        float wrap = 39062;
+
+        gpio_set_function(PIN, GPIO_FUNC_PWM);  //Initialize Pin as PWM Pin Type
+        uint slice_num = pwm_gpio_to_slice_num(PIN);    //Find Slice Num for Pin
+
+        pwm_config config = pwm_get_default_config();   //Config
+        
+        uint64_t clockspeed = clock_get_hz(clk_sys);    //Find the System's Clockspeed
+        clockDiv = 64;
+        wrap = 39062;
+
+        while (clockspeed/clockDiv/50 > 65535 && clockDiv < 256) clockDiv += 64; 
+        wrap = clockspeed/clockDiv/50;  //Calculate Wrap Value
+
+        pwm_config_set_clkdiv(&config, clockDiv);   //Set ClockDiv
+        pwm_config_set_wrap(&config, wrap); //Set Wrap
+
+        pwm_init(slice_num, &config, true); //Initialize the PWM Pin
+
+        setMillis(startMillis); //SetMillis
+    }
+
+    void setAngle(unsigned int angle)
+    {
+        if (angle > 180)
+        {
+            angle = 180;
         }
-        if (degree < 0){
-            return;
+        if (angle < 0)
+        {
+            angle = 0;
         }
 
-        unsigned int duty = 500 + (degree * 2000) / 180;
+        unsigned int duty = 500 + (angle * 2000) / 180;
 
+        setMillis(duty);
+    }
 
-        pwm_set_gpio_level(PIN, duty);
+    void stop()
+    {
+        pwm_set_gpio_level(PIN, 0);
     }
 };
 
@@ -230,7 +255,7 @@ class onBoardLED
 
 class Robot
 {
-    private:
+    public:
     Motor motor1;   //Front Left
     Motor motor2;   //Back Left
     Motor motor3;   //Front Right
@@ -252,7 +277,7 @@ class Robot
 
         sensor.setup();
         led.setup();
-        servo.setup();
+        servo.setup(1500);
     }
 
     void moveForward(unsigned int speed)  //Robot Move Forward
@@ -321,9 +346,9 @@ class Robot
         }
     }
 
-    void moveServo(unsigned int degree)
+    void moveServo(unsigned int angle)
     {
-        servo.setAngle(degree);
+        servo.setAngle(angle);
     }
 };
 
@@ -332,26 +357,26 @@ int main()
     Robot robot;
     robot.setup();
 
+    unsigned int angle = 90;
+    bool direction = true;
+
     while(true)
     {
-        if(robot.tooClose())
+        angle += direction ? 5 : -5;
+
+        if(angle >= 180)
         {
-            robot.stop();
-            sleep_ms(800);
-
-            robot.moveBackward(50);
-            sleep_ms(300);
-
-            robot.stop();
-            sleep_ms(500);
-
-            robot.turnRight();
+            direction = false;
         }
-        else
+        if(angle <= 0)
         {
-            robot.moveForward(50);
+            direction = true;
         }
+
+        robot.moveServo(angle);
+        
+        sleep_ms(10);
     }
-
+    
     return 0;
 }
