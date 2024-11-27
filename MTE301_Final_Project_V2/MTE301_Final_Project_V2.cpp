@@ -139,18 +139,18 @@ class Servo
         setMillis(startMillis); //SetMillis
     }
 
-    void setAngle(unsigned int angle)
+    void setAngle(double angle)
     {
-        if (angle > 180)
+        if (angle > 180.0)
         {
-            angle = 180;
+            angle = 180.0;
         }
-        if (angle < 0)
+        if (angle < 0.0)
         {
-            angle = 0;
+            angle = 0.0;
         }
 
-        unsigned int duty = 500 + (angle * 2000) / 180;
+        double duty = 500.0 + (angle * 2000.0) / 180.0;
 
         setMillis(duty);
     }
@@ -316,8 +316,6 @@ class Robot
         motor2.reverse(20);
         motor3.forward(20);
         motor4.forward(20);
-
-        sleep_ms(550);
     }
 
     void turnRight()
@@ -326,8 +324,6 @@ class Robot
         motor2.forward(20);
         motor3.reverse(20);
         motor4.reverse(20);
-
-        sleep_ms(550);
     }
 
     bool tooClose()
@@ -346,7 +342,7 @@ class Robot
         }
     }
 
-    void moveServo(unsigned int angle)
+    void moveServo(double angle)
     {
         servo.setAngle(angle);
     }
@@ -357,12 +353,16 @@ int main()
     Robot robot;
     robot.setup();
 
-    unsigned int angle = 90;
+    double angle = 90;
     bool direction = true;
+    bool right_hit = false;
+    bool left_hit = false;
 
     while(true)
     {
-        angle += direction ? 10 : -10;
+        //Sweep Algorithm
+
+        angle += direction ? 1 : -1;
 
         if(angle >= 100)
         {
@@ -375,9 +375,80 @@ int main()
 
         robot.moveServo(angle);
         
-        sleep_ms(10);
+        sleep_ms(15);
 
-        robot.moveForward(50);
+        //Movement Algorithm
+
+        if(robot.tooClose())
+        {
+            robot.stop();
+            sleep_ms(800);
+
+            robot.moveBackward(50);
+            sleep_ms(300);
+
+            robot.stop();
+            sleep_ms(500);
+
+            //Check Right
+
+            robot.moveServo(130);
+            sleep_ms(30);
+
+            if(robot.tooClose())
+            {
+                right_hit = true;
+            }
+
+            //Check Left
+
+            robot.moveServo(30);
+            sleep_ms(30);
+
+            if(robot.tooClose())
+            {
+                left_hit = true;
+            }
+
+            //Reset Servo Angle
+
+            robot.moveServo(90);
+            sleep_ms(30);
+
+            //If Wall, Turn 180 Around
+
+            if(right_hit == true && left_hit == true)
+            {
+                robot.turnLeft();
+                sleep_ms(1100);
+            }
+
+            //If Right Obstacle, Turn Left
+
+            if(right_hit == true && left_hit == false)
+            {
+                while(robot.tooClose())
+                {
+                    robot.turnLeft();
+                    sleep_ms(10);
+                }
+            }
+
+            //If Left Obstacle, Turn Right
+
+            if(right_hit == false && left_hit == true)
+            {
+                while(robot.tooClose())
+                {
+                    robot.turnRight();
+                    sleep_ms(10);
+                }
+            }
+        }
+        else
+        {
+            robot.moveForward(50);
+        }
     }
     
     return 0;
