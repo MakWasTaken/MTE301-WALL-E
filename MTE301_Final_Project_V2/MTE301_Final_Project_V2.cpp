@@ -375,7 +375,7 @@ int main()
 
         robot.moveServo(angle);
         
-        sleep_ms(15);
+        sleep_ms(5);
 
         //Movement Algorithm
 
@@ -384,36 +384,64 @@ int main()
             robot.stop();
             sleep_ms(800);
 
-            robot.moveBackward(50);
-            sleep_ms(300);
+            //Reset Servo Angle
 
-            robot.stop();
-            sleep_ms(500);
+            robot.moveServo(140);
+            sleep_ms(10);
 
-            //Check Right
-
-            robot.moveServo(130);
-            sleep_ms(30);
-
-            if(robot.tooClose())
+            //Scan Left
+            
+            for(int i = 140 ; i < 150 ; i+=1)
             {
-                right_hit = true;
+                robot.moveServo(i);
+
+                if(robot.tooClose() && !left_hit)
+                {
+                    left_hit = true;
+                }
+
+                sleep_ms(15);
             }
 
-            //Check Left
+            //Reset Servo Angle
 
-            robot.moveServo(30);
-            sleep_ms(30);
+            robot.moveServo(40);
+            sleep_ms(10);
 
-            if(robot.tooClose())
+            //Scan Right
+
+            for(int i = 40 ; i > 30 ; i-=1)
             {
-                left_hit = true;
+                robot.moveServo(i);
+
+                if(robot.tooClose() && !right_hit)
+                {
+                    right_hit = true;
+                }
+
+                sleep_ms(15);
             }
 
             //Reset Servo Angle
 
             robot.moveServo(90);
-            sleep_ms(30);
+            sleep_ms(10);
+
+            //If Right Obstacle, Turn Left
+
+            if(right_hit == true && left_hit == false)
+            {
+                robot.turnLeft();
+                sleep_ms(300);
+            }
+
+            //If Left Obstacle, Turn Right
+
+            if(left_hit == true && right_hit == false)
+            {
+                robot.turnRight();
+                sleep_ms(300);
+            }
 
             //If Wall, Turn 180 Around
 
@@ -423,31 +451,14 @@ int main()
                 sleep_ms(1100);
             }
 
-            //If Right Obstacle, Turn Left
+            //Reset Hit Bools
 
-            if(right_hit == true && left_hit == false)
-            {
-                while(robot.tooClose())
-                {
-                    robot.turnLeft();
-                    sleep_ms(10);
-                }
-            }
-
-            //If Left Obstacle, Turn Right
-
-            if(right_hit == false && left_hit == true)
-            {
-                while(robot.tooClose())
-                {
-                    robot.turnRight();
-                    sleep_ms(10);
-                }
-            }
+            right_hit = false;
+            left_hit = false;
         }
         else
         {
-            robot.moveForward(50);
+            robot.moveForward(30);
         }
     }
     
