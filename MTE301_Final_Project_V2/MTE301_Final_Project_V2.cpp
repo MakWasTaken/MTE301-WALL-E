@@ -326,11 +326,11 @@ class Robot
         motor4.reverse(20);
     }
 
-    bool tooClose()
+    bool tooClose(double dis)
     {
         double distance = sensor.findDis();
 
-        if(distance < 50.0)
+        if(distance < dis)
         {
             led.ledON();
             return true;
@@ -379,13 +379,10 @@ int main()
 
         //Movement Algorithm
 
-        if(robot.tooClose())
+        if(robot.tooClose(50.0))
         {
             robot.stop();
             sleep_ms(800);
-
-            bool temp_right_hit = false;
-            bool temp_left_hit = false;
 
             //Change Servo Angle
 
@@ -402,9 +399,9 @@ int main()
 
                 sleep_ms(50);
 
-                if(robot.tooClose())
+                if(robot.tooClose(70.0))
                 {
-                    temp_left_hit = true;
+                    left_hit = true;
                 }
             }
 
@@ -428,9 +425,9 @@ int main()
 
                 sleep_ms(50);
 
-                if(robot.tooClose())
+                if(robot.tooClose(70.0))
                 {
-                    temp_right_hit = true;
+                    right_hit = true;
                 }
             }
 
@@ -439,10 +436,12 @@ int main()
             robot.moveServo(90);
             sleep_ms(100);
 
-            left_hit = temp_left_hit;
-            right_hit = temp_right_hit;
-
             if(right_hit == true && left_hit == true)   //If Wall, Turn 180 Around
+            {
+                robot.turnLeft();
+                sleep_ms(1100);
+            }
+            else if(right_hit == false && left_hit == false)   //If Wall (Left & Right Out of Range), Turn 180 Around
             {
                 robot.turnLeft();
                 sleep_ms(1100);
@@ -465,7 +464,7 @@ int main()
         }
         else
         {
-            robot.moveForward(30);
+            robot.moveForward(50);
         }
     }
     
