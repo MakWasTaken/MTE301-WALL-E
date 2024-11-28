@@ -384,71 +384,78 @@ int main()
             robot.stop();
             sleep_ms(800);
 
-            //Reset Servo Angle
+            bool temp_right_hit = false;
+            bool temp_left_hit = false;
+
+            //Change Servo Angle
 
             robot.moveServo(140);
-            sleep_ms(10);
+            sleep_ms(100);
 
             //Scan Left
+
+            left_hit = false;   //Ensure Left Hit is False Before Scan
             
             for(int i = 140 ; i < 150 ; i+=1)
             {
                 robot.moveServo(i);
 
-                if(robot.tooClose() && !left_hit)
+                sleep_ms(50);
+
+                if(robot.tooClose())
                 {
-                    left_hit = true;
+                    temp_left_hit = true;
                 }
-
-                sleep_ms(15);
-            }
-
-            //Reset Servo Angle
-
-            robot.moveServo(40);
-            sleep_ms(10);
-
-            //Scan Right
-
-            for(int i = 40 ; i > 30 ; i-=1)
-            {
-                robot.moveServo(i);
-
-                if(robot.tooClose() && !right_hit)
-                {
-                    right_hit = true;
-                }
-
-                sleep_ms(15);
             }
 
             //Reset Servo Angle
 
             robot.moveServo(90);
-            sleep_ms(10);
+            sleep_ms(100);
 
-            //If Right Obstacle, Turn Left
+            //Change Servo Angle
 
-            if(right_hit == true && left_hit == false)
+            robot.moveServo(40);
+            sleep_ms(100);
+
+            //Scan Right
+
+            right_hit = false;   //Ensure Right Hit is False Before Scan
+
+            for(int i = 40 ; i > 30 ; i-=1)
             {
-                robot.turnLeft();
-                sleep_ms(300);
+                robot.moveServo(i);
+
+                sleep_ms(50);
+
+                if(robot.tooClose())
+                {
+                    temp_right_hit = true;
+                }
             }
 
-            //If Left Obstacle, Turn Right
+            //Reset Servo Angle
 
-            if(left_hit == true && right_hit == false)
+            robot.moveServo(90);
+            sleep_ms(100);
+
+            left_hit = temp_left_hit;
+            right_hit = temp_right_hit;
+
+            if(right_hit == true && left_hit == true)   //If Wall, Turn 180 Around
+            {
+                robot.turnLeft();
+                sleep_ms(1100);
+            }
+            else if(left_hit == true)  //If Left Obstacle, Turn Right
             {
                 robot.turnRight();
                 sleep_ms(300);
             }
-
-            //If Wall, Turn 180 Around
-
-            if(right_hit == true && left_hit == true)
+            else if(right_hit == true) //If Right Obstacle, Turn Left
             {
                 robot.turnLeft();
-                sleep_ms(1100);
+                sleep_ms(300);
             }
 
             //Reset Hit Bools
