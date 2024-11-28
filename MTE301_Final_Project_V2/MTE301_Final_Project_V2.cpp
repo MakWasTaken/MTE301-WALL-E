@@ -287,7 +287,7 @@ class Robot
         motor3.forward(speed);   
         motor4.forward(speed);   
         
-        sleep_ms(10);
+        sleep_ms(5);
     }
 
     void moveBackward(unsigned int speed)  //Robot Move Backward
@@ -297,7 +297,7 @@ class Robot
         motor3.reverse(speed);   
         motor4.reverse(speed);
 
-        sleep_ms(10);   
+        sleep_ms(5);   
     }
 
     void stop() //Robot Stop
@@ -399,7 +399,7 @@ int main()
 
                 sleep_ms(50);
 
-                if(robot.tooClose(70.0))
+                if(robot.tooClose(50.0))
                 {
                     left_hit = true;
                 }
@@ -425,7 +425,7 @@ int main()
 
                 sleep_ms(50);
 
-                if(robot.tooClose(70.0))
+                if(robot.tooClose(50.0))
                 {
                     right_hit = true;
                 }
@@ -439,22 +439,22 @@ int main()
             if(right_hit == true && left_hit == true)   //If Wall, Turn 180 Around
             {
                 robot.turnLeft();
-                sleep_ms(1100);
+                sleep_ms(700);
             }
             else if(right_hit == false && left_hit == false)   //If Wall (Left & Right Out of Range), Turn 180 Around
             {
                 robot.turnLeft();
-                sleep_ms(1100);
+                sleep_ms(700);
             }
             else if(left_hit == true)  //If Left Obstacle, Turn Right
             {
                 robot.turnRight();
-                sleep_ms(300);
+                sleep_ms(150);
             }
             else if(right_hit == true) //If Right Obstacle, Turn Left
             {
                 robot.turnLeft();
-                sleep_ms(300);
+                sleep_ms(150);
             }
 
             //Reset Hit Bools
