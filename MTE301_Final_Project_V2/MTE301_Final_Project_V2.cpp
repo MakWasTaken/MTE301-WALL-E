@@ -141,7 +141,7 @@ class Servo
 
     void setAngle(double angle)
     {
-        if (angle > 180.0)
+        if (angle > 180.0)  //Ensure Angle is a Valid Angle
         {
             angle = 180.0;
         }
@@ -150,14 +150,14 @@ class Servo
             angle = 0.0;
         }
 
-        double duty = 500.0 + (angle * 2000.0) / 180.0;
+        double duty = 500.0 + (angle * 2000.0) / 180.0; //Calculate Duty Cycle in Milliseconds
 
         setMillis(duty);
     }
 
     void stop()
     {
-        pwm_set_gpio_level(PIN, 0);
+        pwm_set_gpio_level(PIN, 0); //Stop the Servo
     }
 };
 
@@ -191,7 +191,7 @@ class Sensor
         echoPin = pin;
     }
 
-    void setup()    //Set up Trigger Pin to be Input and Echo Pin to be Output
+    void setup()    //Set up Echo Pin to be Input and Trigger Pin to be Output
     {
         gpio_init(trigPin);
         gpio_set_dir(trigPin, GPIO_OUT);
@@ -326,7 +326,7 @@ class Robot
         motor4.reverse(20);
     }
 
-    bool tooClose(double dis)
+    bool tooClose(double dis)   //Robot too Close to an Obstacle
     {
         double distance = sensor.findDis();
 
@@ -342,7 +342,7 @@ class Robot
         }
     }
 
-    void moveServo(double angle)
+    void moveServo(double angle)    //Move Servo
     {
         servo.setAngle(angle);
     }
